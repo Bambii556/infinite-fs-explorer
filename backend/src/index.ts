@@ -11,7 +11,7 @@ app.use(cors());
 // First attempt: Basic streaming of directory entries as JSON lines
 app.get("/api/files/v1", async (req, res) => {
   const requestPath = (req.query.path as string) || "";
-  const rootDir = path.resolve(process.env.DATA_ROOT || "./data");
+  const rootDir = path.resolve(process.env.DATA_ROOT || ".");
   const fullPath = path.resolve(rootDir, "." + requestPath);
 
   // Security things
@@ -84,7 +84,7 @@ app.get("/api/files/v1", async (req, res) => {
 
 app.get("/api/files", async (req, res) => {
   const requestPath = (req.query.path as string) || "";
-  const rootDir = path.resolve(process.env.DATA_ROOT || "./data");
+  const rootDir = path.resolve(process.env.DATA_ROOT || ".");
   const fullPath = path.resolve(rootDir, "." + requestPath);
 
   // Security things
