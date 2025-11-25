@@ -1,0 +1,167 @@
+<div class="container-fluid py-3">
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb bg-light p-2 rounded">
+      <li class="breadcrumb-item">
+        <a href="javascript:void(0)" (click)="navigate('')">
+          <i class="bi bi-house-door-fill me-1"></i>root
+        </a>
+      </li>
+      <li
+        class="breadcrumb-item"
+        *ngFor="let part of breadcrumb; let i = index"
+        [class.active]="i === breadcrumb.length - 1"
+        [attr.aria-current]="i === breadcrumb.length - 1 ? 'page' : null"
+      >
+        <a
+          *ngIf="i !== breadcrumb.length - 1"
+          href="javascript:void(0)"
+          (click)="navigateToIndex(i)"
+          >{{ part }}</a
+        >
+        <span *ngIf="i === breadcrumb.length - 1">{{ part }}</span>
+      </li>
+    </ol>
+  </nav>
+
+  <div class="row mb-3">
+    <div class="col-auto">
+      <h5 class="mb-0">
+        <i class="bi bi-file-earmark-fill me-2"></i>Files:
+        <span class="badge bg-primary rounded-pill">{{ fileCount() | number }}</span>
+      </h5>
+    </div>
+    <div class="col-auto">
+      <h5 class="mb-0">
+        <i class="bi bi-folder-fill me-2"></i>Directories:
+        <span class="badge bg-success rounded-pill">{{ directoryCount() | number }}</span>
+      </h5>
+    </div>
+  </div>
+
+  <div *ngIf="loading()" class="alert alert-info">
+    Loading {{ loadedCount() | number }} files...
+    <ng-container *ngIf="loadedCount() > 10000"> (large folder, please wait)</ng-container>
+    <div class="mt-2 small">
+      Streaming: loading={{ loading() }}, loadedCount={{ loadedCount() }}, files.length={{
+        files().length
+      }}
+    </div>
+  </div>
+
+  <div *ngIf="!loading() && files().length === 0" class="alert alert-warning">
+    No files loaded. Debug: loading={{ loading() }}, loadedCount={{ loadedCount() }},
+    files.length={{ files().length }}
+  </div>
+
+  <cdk-virtual-scroll-viewport itemSize="56" class="viewport">
+    <table class="table table-hover table-striped">
+      <thead class="table-light">
+        <tr>
+          <!-- Name Header -->
+          <th class="sortable-header" (click)="toggleSort('name')">
+            Name
+            <ng-container *ngIf="sortKey() === 'name'">
+              <span class="sort-icon">{{ sortDirection() === 'asc' ? '▲' : '▼' }}</span>
+            </ng-container>
+          </th>
+          <!-- Size Header -->
+          <th class="text-end sortable-header" (click)="toggleSort('size')">
+            Size
+            <ng-container *ngIf="sortKey() === 'size'">
+              <span class="sort-icon">{{ sortDirection() === 'asc' ? '▲' : '▼' }}</span>
+            </ng-container>
+          </th>
+          <!-- Created Header -->
+          <th class="text-end sortable-header" (click)="toggleSort('created')">
+            Created
+            <ng-container *ngIf="sortKey() === 'created'">
+              <span class="sort-icon">{{ sortDirection() === 'asc' ? '▲' : '▼' }}</span>
+            </ng-container>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *cdkVirtualFor="let file of sortedFiles()"
+          (click)="file.isDirectory ? navigate(file.path) : showDetails(file)"
+          class="file-row"
+          [class.directory]="file.isDirectory"
+          style="height: 56px"
+        >
+          <td>
+            <i class="bi {{ getFileIcon(file) }} me-2"></i>
+            {{ file.name }}
+          </td>
+          <td class="text-end text-monospace">
+            {{ file.size !== null ? (file.size | number) + ' B' : '—' }}
+          </td>
+          <td class="text-end text-monospace">
+            {{ file.created | date : 'short' }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </cdk-virtual-scroll-viewport>
+</div>
+
+<!-- Details Modal -->
+<div
+  *ngIf="selectedFile()"
+  class="modal fade show d-block"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="fileDetailsModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="fileDetailsModalLabel">
+          Details for: {{ selectedFile()!.name }}
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          aria-label="Close"
+          (click)="closeDetails()"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <dl class="row">
+          <dt class="col-sm-3">Name:</dt>
+          <dd class="col-sm-9">{{ selectedFile()!.name }}</dd>
+
+          <dt class="col-sm-3">Path:</dt>
+          <dd class="col-sm-9 text-break">{{ selectedFile()!.path }}</dd>
+
+          <dt class="col-sm-3">Type:</dt>
+          <dd class="col-sm-9">{{ selectedFile()!.type }}</dd>
+
+          <dt class="col-sm-3" *ngIf="selectedFile()!.size !== null">Size:</dt>
+          <dd class="col-sm-9" *ngIf="selectedFile()!.size !== null">
+            {{ selectedFile()!.size | number }} B
+          </dd>
+
+          <dt class="col-sm-3">Created:</dt>
+          <dd class="col-sm-9">{{ selectedFile()!.created | date : 'medium' }}</dd>
+
+          <dt class="col-sm-3" *ngIf="selectedFile()!.modified">Modified:</dt>
+          <dd class="col-sm-9" *ngIf="selectedFile()!.modified">
+            {{ selectedFile()!.modified | date : 'medium' }}
+          </dd>
+
+          <dt class="col-sm-3" *ngIf="selectedFile()!.extension">Extension:</dt>
+          <dd class="col-sm-9" *ngIf="selectedFile()!.extension">
+            {{ selectedFile()!.extension }}
+          </dd>
+        </dl>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeDetails()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay -->
+<div *ngIf="selectedFile()" class="modal-backdrop fade show"></div>

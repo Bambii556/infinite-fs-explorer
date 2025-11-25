@@ -1,0 +1,16 @@
+.viewport {
+  height: calc(100vh - 200px);
+  display: block;
+}
+.sticky-top {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.sortable-header {
+  cursor: pointer;
+}
+.sort-icon {
+  margin-left: 5px;
+  font-size: 0.8em;
+}
