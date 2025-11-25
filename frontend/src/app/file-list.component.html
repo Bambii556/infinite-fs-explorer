@@ -150,6 +150,11 @@
             {{ selectedFile()!.modified | date : 'medium' }}
           </dd>
 
+          <dt class="col-sm-3" *ngIf="selectedFile()!.permissions">Permissions:</dt>
+          <dd class="col-sm-9" *ngIf="selectedFile()!.permissions">
+            {{ selectedFile()!.permissions!.slice(-3) }}
+          </dd>
+
           <dt class="col-sm-3" *ngIf="selectedFile()!.extension">Extension:</dt>
           <dd class="col-sm-9" *ngIf="selectedFile()!.extension">
             {{ selectedFile()!.extension }}

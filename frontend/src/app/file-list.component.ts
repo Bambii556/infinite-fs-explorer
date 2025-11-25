@@ -11,6 +11,7 @@ interface FileEntry {
   isDirectory: boolean;
   created: number;
   modified?: number;
+  permissions?: string;
   extension?: string | null;
   type: 'file' | 'directory';
 }
