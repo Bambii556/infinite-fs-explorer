@@ -28,7 +28,7 @@ This method runs both frontend and backend services entirely within Docker conta
 
 1.  **Ensure you are in the project root directory**:
     ```bash
-    cd /Users/shaun/git/gh/infinite-fs-explorer
+    cd ~/infinite-fs-explorer
     ```
 2.  **Map the 'Data' directory you want to be mapped into the API container**:
     ```bash
